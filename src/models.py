@@ -46,7 +46,6 @@ class WalletItem(BaseModel):
     free: Decimal
     last_price_usdt: Decimal
     available_liquidity: Decimal
-    market_cap: Decimal
     pnl_24hr_usdt: Decimal
     pnl_24hr_percentage: Decimal
 
@@ -78,7 +77,30 @@ class WalletItem(BaseModel):
             free=free,
             last_price_usdt=Decimal('1'),
             available_liquidity=Decimal('999999999'),
-            market_cap=Decimal('0'),
             pnl_24hr_usdt=Decimal('0'),
             pnl_24hr_percentage=Decimal('0')
         )
+
+class Order(BaseModel):
+    symbol: str
+    order_id: int = Field(alias="orderId")
+    order_list_id: int = Field(alias="orderListId")
+    client_order_id: str = Field(alias="clientOrderId")
+    trans_time: datetime = Field(alias="transactTime")
+    price: Decimal = Field(alias="price")
+    orig_qty: Decimal = Field(alias="origQty")
+    executed_qty: Decimal = Field(alias="executedQty")
+    orig_quote_order_qty: Decimal = Field(alias="origQuoteOrderQty")
+    cummulative_quote_qty: Decimal = Field(alias="cummulativeQuoteQty")
+    status: str
+    time_in_force: str = Field(alias="timeInForce")
+    type: str
+    side: str
+    working_time: datetime = Field(alias="workingTime")
+    self_trade_prevention_mode: str = Field(alias="selfTradePreventionMode")
+
+    class Config:
+        populate_by_name = True  # Allows populating by aliased or non-aliased names
+        json_encoders = {
+            Decimal: str  # Ensures Decimals are serialized as strings
+        }
