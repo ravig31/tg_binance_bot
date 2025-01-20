@@ -19,7 +19,13 @@ bc = BinanceClient()
 
 
 @wallet_router.message(Command("wallet"))
-async def command_show_wallet(message: Message, is_new: bool = False):
+async def command_show_wallet(message: Message, is_new: bool = False) -> None:
+    """Display wallet overview with asset balances and 24h performance.
+
+    :param message: Incoming message from user
+    :param is_new: Flag to determine if this is a new message or edit existing
+    :return: None
+    """
     wallet: List[WalletItem] = build_wallet()
     total_balance = sum(asset.balance_usdt for asset in wallet)
     html_message = (
@@ -62,18 +68,35 @@ async def command_show_wallet(message: Message, is_new: bool = False):
 
 
 @wallet_router.callback_query(F.data == "back_to_start")
-async def back_to_start(callback: CallbackQuery):
+async def back_to_start(callback: CallbackQuery) -> None:
+    """Handle navigation back to start menu.
+
+    :param callback: Callback query from back button
+    :return: None
+    """
     await start.command_start_handler(callback.message, is_new=False)
     await callback.answer()
 
 
 @wallet_router.callback_query(F.data == "refresh_wallet")
-async def refresh_wallet(callback: CallbackQuery):
+async def refresh_wallet(callback: CallbackQuery) -> None:
+    """Refresh wallet display with latest data.
+
+    :param callback: Callback query from refresh button
+    :return: None
+    """
     await command_show_wallet(callback.message, is_new=False)
     await callback.answer()
 
 
 def build_wallet() -> List[WalletItem]:
+    """Build complete wallet overview with current prices and performance data.
+    
+    Fetches user assets and corresponding 24hr price data, calculates liquidity depths,
+    and returns sorted list of wallet items by USD value.
+
+    :return: List of wallet items sorted by USD value
+    """
     user_assets: List[UserAsset] = bc.get_user_assets()
     filtered_symbols = [ua.symbol for ua in user_assets if ua.symbol != USDT]
     price_data: Dict[str, Ticker24hrData] = bc.get_24hr_price_data(
@@ -102,6 +125,11 @@ def build_wallet() -> List[WalletItem]:
 
 
 def build_wallet_item(symbol: str) -> WalletItem:
+    """Build single wallet item with current price and performance data.
+
+    :param symbol: Asset symbol to build wallet item for
+    :return: Wallet item with current market data
+    """
     asset: UserAsset = bc.get_user_asset(symbol)
     pd: Ticker24hrData = bc.get_24hr_price_data_single(utils.pair_ticker(symbol, USDT))
 
@@ -116,9 +144,21 @@ def build_wallet_item(symbol: str) -> WalletItem:
         pnl_24hr_percentage=pd.price_change_percent,
     )
 
+
 def calculate_depth(
-    bid_price: Decimal, bid_qty: Decimal, ask_price: Decimal, ask_qty: Decimal
+    bid_price: Decimal, 
+    bid_qty: Decimal, 
+    ask_price: Decimal, 
+    ask_qty: Decimal
 ) -> Decimal:
+    """Calculate total market depth from bid and ask data.
+
+    :param bid_price: Best bid price
+    :param bid_qty: Best bid quantity
+    :param ask_price: Best ask price
+    :param ask_qty: Best ask quantity
+    :return: Total market depth in USDT
+    """
     bid_value = bid_price * bid_qty
     ask_value = ask_price * ask_qty
 

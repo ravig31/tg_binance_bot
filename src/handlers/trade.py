@@ -29,7 +29,11 @@ class SellState(StatesGroup):
 
 @trade_router.message(Command("sell"))
 async def command_sell_handler(message: Message) -> None:
-    """Initial sell command - shows available assets as buttons"""
+    """Display available assets for selling as interactive buttons.
+
+    :param message: Incoming message from user
+    :return: None
+    """
     available_assets = wallet.build_wallet()
 
     builder = InlineKeyboardBuilder()
@@ -52,7 +56,12 @@ async def command_sell_handler(message: Message) -> None:
 
 @trade_router.callback_query(F.data.startswith("sell_asset_"))
 async def show_order_type_selection(callback: CallbackQuery, state: FSMContext):
-    """Show order type selection buttons"""
+    """Show order type selection menu and asset details.
+
+    :param callback: Callback query from the button press
+    :param state: FSM context for state management
+    :return: None
+    """   
     symbol = callback.data.replace("sell_asset_", "")
     asset = wallet.build_wallet_item(symbol)
 
@@ -89,7 +98,12 @@ async def show_order_type_selection(callback: CallbackQuery, state: FSMContext):
 
 @trade_router.callback_query(F.data.startswith("select_type_"))
 async def handle_order_type_selection(callback: CallbackQuery, state: FSMContext):
-    """Process order type selection and prompt for amount"""
+    """Process selected order type and prompt for amount input.
+
+    :param callback: Callback query from the order type selection
+    :param state: FSM context for state management
+    :return: None
+    """
     symbol, order_type = callback.data.replace("select_type_", "").split("_")
     
     await state.update_data(symbol=symbol, order_type=order_type)
@@ -104,7 +118,12 @@ async def handle_order_type_selection(callback: CallbackQuery, state: FSMContext
 
 @trade_router.message(SellState.AMOUNT)
 async def handle_amount(message: Message, state: FSMContext):
-    """Process amount and show next step based on order type"""
+    """Process entered amount and show appropriate order preview or prompt for limit price.
+
+    :param message: Message containing amount input
+    :param state: FSM context for state management
+    :return: None
+    """    
     data = await state.get_data()
     symbol = data["symbol"]
     order_type = data["order_type"]
@@ -134,7 +153,15 @@ async def handle_amount(message: Message, state: FSMContext):
         )
 
 async def show_market_order_preview(message, state, symbol, amount, asset):
-    """Show market order preview and confirmation"""
+    """Display market order preview with confirmation button.
+
+    :param message: Original message for replying
+    :param state: FSM context for state management
+    :param symbol: Trading pair symbol
+    :param amount: Order amount
+    :param asset: Asset information object
+    :return: None
+    """
     builder = InlineKeyboardBuilder()
     builder.add(
         InlineKeyboardButton(
@@ -156,7 +183,12 @@ async def show_market_order_preview(message, state, symbol, amount, asset):
 
 @trade_router.message(SellState.LIMIT_PRICE)
 async def handle_limit_price(message: Message, state: FSMContext):
-    """Process limit price and show confirmation"""
+    """Process limit price input and show limit order preview.
+
+    :param message: Message containing limit price input
+    :param state: FSM context for state management
+    :return: None
+    """    
     try:
         limit_price = float(message.text)
         if limit_price <= 0:
@@ -192,7 +224,12 @@ async def handle_limit_price(message: Message, state: FSMContext):
 
 @trade_router.callback_query(F.data.startswith("confirm_market_sell_"))
 async def execute_market_sell(callback: CallbackQuery):
-    """Execute market sell order"""
+    """Execute market sell order and display confirmation.
+
+    :param callback: Callback query from confirmation button
+    :return: None
+    :raises: Various exceptions from BinanceClient
+    """
     symbol, amount = callback.data.replace("confirm_market_sell_", "").split("_")
     amount = float(amount)
 
@@ -213,7 +250,12 @@ async def execute_market_sell(callback: CallbackQuery):
 
 @trade_router.callback_query(F.data.startswith("confirm_limit_sell_"))
 async def execute_limit_sell(callback: CallbackQuery):
-    """Execute limit sell order"""
+    """Execute limit sell order and display confirmation.
+
+    :param callback: Callback query from confirmation button
+    :return: None
+    :raises: Various exceptions from BinanceClient
+    """
     symbol, amount, price = callback.data.replace("confirm_limit_sell_", "").split("_")
     amount = float(amount)
     price = float(price)
