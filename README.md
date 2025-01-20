@@ -36,15 +36,9 @@ Required packages:
 Create a `.env` file in the project root directory:
 
 ```env
-# Telegram Bot Token
 BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
-
-# Binance API Keys
 BINANCE_API_KEY=your_binance_api_key_here
 BINANCE_SECRET_KEY=your_binance_secret_key_here
-
-# Optional: Test Mode (set to True for testnet)
-TEST_MODE=False
 ```
 
 ### 5. Run the Bot
