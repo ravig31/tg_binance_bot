@@ -67,15 +67,6 @@ async def command_show_wallet(message: Message, is_new: bool = False) -> None:
     )
 
 
-@wallet_router.callback_query(F.data == "back_to_start")
-async def back_to_start(callback: CallbackQuery) -> None:
-    """Handle navigation back to start menu.
-
-    :param callback: Callback query from back button
-    :return: None
-    """
-    await start.command_start_handler(callback.message, is_new=False)
-    await callback.answer()
 
 
 @wallet_router.callback_query(F.data == "refresh_wallet")

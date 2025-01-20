@@ -46,7 +46,7 @@ async def command_sell_handler(message: Message) -> None:
             )
 
     builder.adjust(3)
-    builder.add(InlineKeyboardButton(text="⬅️ Back", callback_data="show_start"))
+    builder.add(InlineKeyboardButton(text="⬅️ Back", callback_data="back_to_start"))
 
     await message.answer(
         text="<b>Select asset to sell:</b>",
@@ -81,7 +81,7 @@ async def show_order_type_selection(callback: CallbackQuery, state: FSMContext):
         )
     )
     builder.adjust(1,1,1)
-    builder.add(InlineKeyboardButton(text="⬅️ Back", callback_data="show_start"))
+    builder.add(InlineKeyboardButton(text="⬅️ Back", callback_data="back_to_start"))
 
     await callback.message.edit_text(
         text=f"<b>🔸 Sell {asset.symbol}</b>\n\n"
@@ -209,7 +209,7 @@ async def handle_limit_price(message: Message, state: FSMContext):
             callback_data=f"confirm_limit_sell_{symbol}_{amount}_{limit_price}",
         )
     )
-    builder.add(InlineKeyboardButton(text="⬅️ Back", callback_data=f"sell_asset_{symbol}"))
+    builder.add(InlineKeyboardButton(text="⬅️ Back", callback_data=f"back_to_start"))
 
     await message.answer(
         text=f"<b>Limit Order Preview:</b>\n\n"

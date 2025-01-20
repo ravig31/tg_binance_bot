@@ -9,7 +9,7 @@ from aiogram.enums import ParseMode
 
 from handlers.wallet import wallet_router
 from handlers.start import start_router
-from handlers.sell import trade_router
+from handlers.sell import sell_router
 import bot_logger
 
 
@@ -27,7 +27,7 @@ async def main() -> None:
     dp.include_routers(
         start_router,
         wallet_router,
-        trade_router
+        sell_router
     )
     
     bot = Bot(

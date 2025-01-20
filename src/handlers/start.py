@@ -34,6 +34,16 @@ async def command_start_handler(message: Message, is_new: bool = True) -> None:
         parse_mode="HTML",
     )
 
+@start_router.callback_query(F.data == "back_to_start")
+async def back_to_start(callback: CallbackQuery) -> None:
+    """Handle navigation back to start menu.
+
+    :param callback: Callback query from back button
+    :return: None
+    """
+    await command_start_handler(callback.message, is_new=False)
+    await callback.answer()
+
 
 @start_router.callback_query(F.data[:4] == 'cmd_')
 async def process_callback(callback: CallbackQuery, state: FSMContext) -> None:
