@@ -2,11 +2,13 @@ from typing import List, Dict
 from decimal import Decimal
 
 from models import UserAsset, Ticker24hrData, WalletItem
-from utils import pair_ticker
+import utils
+from handlers import start
 
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, InlineKeyboardButton, CallbackQuery
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from binance_api import BinanceClient
 
 USDT = "USDT"
@@ -16,12 +18,12 @@ bc = BinanceClient()
 
 
 @wallet_router.message(Command("wallet"))
-async def command_viewwallet(message: Message):
+async def command_view_wallet(message: Message, is_new: bool = False):
     user_assets: List[UserAsset] = bc.get_user_assets()
     
     filtered_symbols = [ua.symbol for ua in user_assets if ua.symbol != USDT]
     price_data: Dict[str, Ticker24hrData] = bc.get_24hr_price_data(
-        [pair_ticker(symbol, USDT) for symbol in filtered_symbols]
+        [utils.pair_ticker(symbol, USDT) for symbol in filtered_symbols]
     )
     wallet: List[WalletItem] = build_wallet(user_assets, price_data)
     total_balance = sum(asset.balance_usdt for asset in wallet)
@@ -52,8 +54,29 @@ async def command_viewwallet(message: Message):
         f"<i>Last updated: {bc.get_server_time()}</i>"
     )
 
-    await message.answer(html_message, parse_mode="HTML")
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        *[
+            InlineKeyboardButton(text="🔄 Refresh", callback_data="refresh_wallet"),
+            InlineKeyboardButton(text="⬅️ Back", callback_data="back_to_start"),
+        ]
+    )
 
+    await (message.answer if is_new else message.edit_text)(
+        html_message,
+        parse_mode="HTML",
+        reply_markup=builder.as_markup()
+    )
+
+@wallet_router.callback_query(F.data == "back_to_start")
+async def back_to_start(callback: CallbackQuery):
+   await start.command_start_handler(callback.message, is_new=False)
+   await callback.answer()
+
+@wallet_router.callback_query(F.data == "refresh_wallet")
+async def refresh_wallet(callback: CallbackQuery):
+   await command_view_wallet(callback.message, is_new=False)
+   await callback.answer()
 
 def build_wallet(
     user_assets: List[UserAsset], 
@@ -62,7 +85,7 @@ def build_wallet(
     result = []
     for asset in user_assets:
         if asset.symbol != USDT:
-            pd = price_data[pair_ticker(asset.symbol, USDT)]
+            pd = price_data[utils.pair_ticker(asset.symbol, USDT)]
             result.append(
                 WalletItem(
                     symbol=asset.symbol,
