@@ -144,7 +144,6 @@ def build_wallet_item(symbol: str) -> WalletItem:
         pnl_24hr_percentage=pd.price_change_percent,
     )
 
-
 def calculate_depth(
     bid_price: Decimal, 
     bid_qty: Decimal, 

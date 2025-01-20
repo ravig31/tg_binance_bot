@@ -80,6 +80,7 @@ class WalletItem(BaseModel):
             pnl_24hr_usdt=Decimal('0'),
             pnl_24hr_percentage=Decimal('0')
         )
+    
 
 class Order(BaseModel):
     symbol: str

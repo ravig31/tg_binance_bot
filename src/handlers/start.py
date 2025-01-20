@@ -3,7 +3,7 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message, InlineKeyboardButton, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
-from handlers import wallet, trade
+from handlers import sell, wallet
 
 start_router = Router()
 
@@ -52,6 +52,6 @@ async def process_callback(callback: CallbackQuery, state: FSMContext) -> None:
         case "view_wallet":
             await wallet.command_show_wallet(callback.message, is_new=True)
         case "sell":
-            await trade.command_sell_handler(callback.message)
+            await sell.command_sell_handler(callback.message)
             
     await callback.answer()

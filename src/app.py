@@ -9,7 +9,7 @@ from aiogram.enums import ParseMode
 
 from handlers.wallet import wallet_router
 from handlers.start import start_router
-from handlers.trade import trade_router
+from handlers.sell import trade_router
 import bot_logger
 
 

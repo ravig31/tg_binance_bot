@@ -12,10 +12,10 @@ from binance_api import BinanceClient
 import logging
 
 logger = logging.getLogger(__name__)
-trade_router = Router()
+sell_router = Router()
 
 bc = BinanceClient()
-trade_router = Router()
+sell_router = Router()
 
 USDT = "USDT"
 class OrderType:
@@ -27,7 +27,7 @@ class SellState(StatesGroup):
     AMOUNT = State()
     LIMIT_PRICE = State()
 
-@trade_router.message(Command("sell"))
+@sell_router.message(Command("sell"))
 async def command_sell_handler(message: Message) -> None:
     """Display available assets for selling as interactive buttons.
 
@@ -54,7 +54,7 @@ async def command_sell_handler(message: Message) -> None:
         parse_mode="HTML",
     )
 
-@trade_router.callback_query(F.data.startswith("sell_asset_"))
+@sell_router.callback_query(F.data.startswith("sell_asset_"))
 async def show_order_type_selection(callback: CallbackQuery, state: FSMContext):
     """Show order type selection menu and asset details.
 
@@ -96,7 +96,7 @@ async def show_order_type_selection(callback: CallbackQuery, state: FSMContext):
     )
     await callback.answer()
 
-@trade_router.callback_query(F.data.startswith("select_type_"))
+@sell_router.callback_query(F.data.startswith("select_type_"))
 async def handle_order_type_selection(callback: CallbackQuery, state: FSMContext):
     """Process selected order type and prompt for amount input.
 
@@ -116,7 +116,7 @@ async def handle_order_type_selection(callback: CallbackQuery, state: FSMContext
     )
     await callback.answer()
 
-@trade_router.message(SellState.AMOUNT)
+@sell_router.message(SellState.AMOUNT)
 async def handle_amount(message: Message, state: FSMContext):
     """Process entered amount and show appropriate order preview or prompt for limit price.
 
@@ -181,7 +181,7 @@ async def show_market_order_preview(message, state, symbol, amount, asset):
     )
     await state.clear()
 
-@trade_router.message(SellState.LIMIT_PRICE)
+@sell_router.message(SellState.LIMIT_PRICE)
 async def handle_limit_price(message: Message, state: FSMContext):
     """Process limit price input and show limit order preview.
 
@@ -222,7 +222,7 @@ async def handle_limit_price(message: Message, state: FSMContext):
     )
     await state.clear()
 
-@trade_router.callback_query(F.data.startswith("confirm_market_sell_"))
+@sell_router.callback_query(F.data.startswith("confirm_market_sell_"))
 async def execute_market_sell(callback: CallbackQuery):
     """Execute market sell order and display confirmation.
 
@@ -234,7 +234,7 @@ async def execute_market_sell(callback: CallbackQuery):
     amount = float(amount)
 
     try:
-        resp = bc.create_sell_market_order(
+        bc.create_sell_market_order(
             symbol=symbol,
             quantity=amount
         )
@@ -248,7 +248,7 @@ async def execute_market_sell(callback: CallbackQuery):
     )
     await callback.answer("Order executed!")
 
-@trade_router.callback_query(F.data.startswith("confirm_limit_sell_"))
+@sell_router.callback_query(F.data.startswith("confirm_limit_sell_"))
 async def execute_limit_sell(callback: CallbackQuery):
     """Execute limit sell order and display confirmation.
 
@@ -261,7 +261,7 @@ async def execute_limit_sell(callback: CallbackQuery):
     price = float(price)
 
     try:
-        resp = bc.create_sell_limit_order(
+        bc.create_sell_limit_order(
             symbol=symbol,
             quantity=amount,
             trigger_price=price
