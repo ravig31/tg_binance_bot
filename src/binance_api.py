@@ -5,7 +5,7 @@ from binance.spot import Spot
 from dotenv import load_dotenv
 from os import getenv
 
-from models import UserAsset
+from models import UserAsset, Ticker24hrData
 import utils
 
 load_dotenv()
@@ -19,16 +19,12 @@ class BinanceClient():
 
     def get_user_assets(self) -> List[UserAsset]:
         wallet_json =  self.client.user_asset()
-
-        result = []
-        for asset in wallet_json:
-            result.append(UserAsset.from_dict(asset))
-    
-        return result
+        return [UserAsset(**x) for x in wallet_json]
 
 
-    def get_(self, symbols: str | List[str]):
-        return self.client.ticker_24hr(symbols)
+    def get_24hr_price_data(self, pairs: List[str]) -> List[Ticker24hrData]:
+        price_data_json = self.client.ticker_24hr(symbols=pairs)
+        return {x['symbol'] : Ticker24hrData(**x) for x in price_data_json}
 
 
     def get_server_time(self):
