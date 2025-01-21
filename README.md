@@ -1,4 +1,4 @@
-# Crypto Trading Bot
+# Binance Wallet Bot for Telegram
 
 A Telegram bot for managing your Binance crypto portfolio and executing trades.
 
