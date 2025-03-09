@@ -44,7 +44,7 @@ BINANCE_SECRET_KEY=your_binance_secret_key_here
 ### 5. Run the Bot
 
 ```bash
-python run_tg.py
+make run_tg
 ```
 
 ## Usage
